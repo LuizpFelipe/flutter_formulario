@@ -21,7 +21,6 @@ class _TransactionFormState extends State<TransactionForm> {
   @override
   void initState() {
     super.initState();
-    // Se o widget recebeu uma transação, preenchemos os campos
     if (widget.transacaoParaEditar != null) {
       _titleController.text = widget.transacaoParaEditar!.titulo;
       _valueController.text = widget.transacaoParaEditar!.valor.toString();

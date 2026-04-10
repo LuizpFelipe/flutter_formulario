@@ -59,7 +59,6 @@ class TransacaoProvider with ChangeNotifier {
     await atualizarTransacoes();
   }
 
-  // NOVA FUNÇÃO DE EDITAR
   Future<void> editarTransacao(
     String id,
     String titulo,
