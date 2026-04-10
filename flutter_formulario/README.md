@@ -14,21 +14,34 @@ Trabalho Bimestral da disciplina de **Programação para Dispositivos Móveis**.
 ## 📱 Sobre o Aplicativo
 O aplicativo é uma ferramenta de **Controle Financeiro** que permite ao usuário gerenciar suas despesas diárias. Além de listar e cadastrar transações, o app exibe um gráfico dinâmico dos gastos realizados nos últimos 7 dias.
 
-### Funcionalidades:
-* **Criar:** Cadastro de nova transação (Título, Valor e Data) via formulário.
-* **Ler:** Listagem de despesas persistidas no backend e exibição de gráfico semanal.
-* **Atualizar:** Possibilidade de edição de registros existentes.
-* **Excluir:** Remoção de transações com atualização em tempo real do estado.
+### Funcionalidades (CRUD):
+* **Create:** Cadastro de nova transação via modal (POST).
+* **Read:** Listagem de despesas e gráfico dinâmico sincronizado (GET).
+* **Update:** Edição de registros existentes (PATCH/PUT).
+* **Delete:** Remoção de transações com atualização reativa (DELETE).
 
 ---
 
-### Estrutura de Pastas:
-```text
-lib/
-├── models/         # Classe Transacao com fromJson e toJson
-├── services/       # TransacaoService usando Dio
-├── providers/      # TransacaoProvider (Lógica de negócio e estado)
-├── ui/
-│   ├── screens/    # Telas (TransactionScreen)
-│   └── widgets/    # Componentes (Chart, ChartBar, Form, List)
-└── main.dart       # Configuração de rotas e injeção de dependência
+## 🛠️ Tecnologias e Arquitetura
+O projeto foi refatorado para seguir os padrões modernos de desenvolvimento profissional em Flutter:
+* **Gerenciamento de Estado:** `Provider` (para uma interface reativa e desacoplada).
+* **Navegação:** `GoRouter` (gerenciamento de rotas declarativas).
+* **Cliente HTTP:** `Dio` (com tratamento de requisições assíncronas).
+* **Backend:** API REST hospedada no Railway.
+
+---
+
+## 🚀 Passo a Passo para Execução
+
+Siga rigorosamente os passos abaixo para compilar e rodar o projeto em sua máquina:
+
+### 1. Pré-requisitos
+* Ter o **Flutter SDK** instalado (versão estável 3.x ou superior).
+* Git instalado para clonagem.
+* Um emulador (Android/iOS), dispositivo físico ou navegador Chrome.
+
+### 2. Clonar o Repositório
+Abra o seu terminal e execute:
+```bash
+git clone [https://github.com/LuizpFelipe/flutter_formulario.git](https://github.com/LuizpFelipe/flutter_formulario.git)
+cd flutter_formulario
