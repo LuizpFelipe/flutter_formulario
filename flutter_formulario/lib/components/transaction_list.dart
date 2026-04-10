@@ -3,10 +3,11 @@ import 'package:flutter_formulario/models/transaction.dart';
 import 'package:intl/intl.dart';
 
 class TransactionList extends StatelessWidget {
-  TransactionList(this._transaction, this.onRemove, {super.key});
+  TransactionList(this._transaction, this.onRemove, this.onEdit, {super.key});
 
   final List<Transaction> _transaction;
   final void Function(String) onRemove;
+  final void Function(Transaction) onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -47,10 +48,20 @@ class TransactionList extends StatelessWidget {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(DateFormat('d MMM y').format(tra.date)),
-                    trailing: IconButton(
-                      onPressed: () => onRemove(tra.id),
-                      icon: Icon(Icons.delete),
-                      color: Colors.red,
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () => onEdit(tra),
+                          icon: Icon(Icons.edit),
+                          color: Colors.blue,
+                        ),
+                        IconButton(
+                          onPressed: () => onRemove(tra.id),
+                          icon: Icon(Icons.delete),
+                          color: Colors.red,
+                        ),
+                      ],
                     ),
                   ),
                 );

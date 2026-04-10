@@ -1,9 +1,8 @@
-import 'dart:math' show Random;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_formulario/components/chart.dart';
 import 'package:flutter_formulario/components/transaction_form.dart';
 import 'package:flutter_formulario/components/transaction_list.dart';
+import 'package:flutter_formulario/services/api_service.dart';
 import 'models/transaction.dart';
 
 void main() => runApp(ExpensesApp());
@@ -39,47 +38,32 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final titleController = TextEditingController();
-  final valueController = TextEditingController();
+  final List<Transaction> _transaction = [];
 
-  final List<Transaction> _transaction = [
-    Transaction(
-      't2',
-      'Carro',
-      299.99,
-      DateTime.now().subtract(Duration(days: -2)),
-    ),
-    Transaction(
-      't3',
-      'Casa',
-      600.99,
-      DateTime.now().subtract(Duration(days: -3)),
-    ),
-    Transaction(
-      't1',
-      'Mercado',
-      400.99,
-      DateTime.now().subtract(Duration(days: -1)),
-    ),
-    Transaction(
-      't4',
-      'Academia',
-      150.99,
-      DateTime.now().subtract(Duration(days: -4)),
-    ),
-    Transaction(
-      'Gasolina',
-      'Carro',
-      299.99,
-      DateTime.now().subtract(Duration(days: -5)),
-    ),
-    Transaction(
-      't6',
-      'Viagem',
-      900.00,
-      DateTime.now().subtract(Duration(days: -6)),
-    ),
-  ];
+  Future<void> carregarTransacoes() async {
+    final data = await ApiService.buscarTransacoes();
+
+    setState(() {
+      _transaction.clear();
+
+      for (var item in data) {
+        _transaction.add(
+          Transaction(
+            item['id'].toString(),
+            item['titulo'],
+            (item['valor'] as num).toDouble(),
+            DateTime.parse(item['data']),
+          ),
+        );
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    carregarTransacoes();
+  }
 
   List<Transaction> get _recentransactio {
     return _transaction.where((tr) {
@@ -87,40 +71,62 @@ class _MyHomePageState extends State<MyHomePage> {
     }).toList();
   }
 
-  void _addTransaction(String title, double value, DateTime date) {
-    final newTransaction = Transaction(
-      Random().nextDouble().toString(),
-      title,
-      value,
-      date,
-    );
+  void _saveTransaction(
+    String? id,
+    String title,
+    double value,
+    DateTime date,
+  ) async {
+    if (title.isEmpty || value <= 0) return;
 
-    if (title.isEmpty || value <= 0 || date == null) {
-      return;
+    try {
+      if (id == null) {
+        await ApiService.criarTransacao(
+          titulo: title,
+          valor: value,
+          data: date,
+        );
+      } else {
+        await ApiService.atualizarTransacao(
+          id: id,
+          titulo: title,
+          valor: value,
+          data: date,
+        );
+      }
+
+      await carregarTransacoes();
+      Navigator.of(context).pop();
+    } catch (e) {
+      print("Erro ao salvar: $e");
     }
-
-    setState(() {
-      _transaction.add(newTransaction);
-    });
-
-    Navigator.of(context).pop();
   }
 
-  _deleteTransaction(String id) {
-    setState(() {
-      _transaction.removeWhere((tr) {
-        return tr.id == id;
-      });
-    });
+  void _deleteTransaction(String id) async {
+    try {
+      await ApiService.deletarTransacao(id);
+      await carregarTransacoes();
+    } catch (e) {
+      print("Erro ao deletar: $e");
+    }
   }
 
-  void _openTransactionFormModel(BuildContext context) {
+  // 🔥 AGORA ACEITA TRANSACTION (EDIT)
+  void _openTransactionFormModel(
+    BuildContext context, [
+    Transaction? transaction,
+  ]) {
     showModalBottomSheet(
       context: context,
       builder: (_) {
-        return TransactionForm(_addTransaction);
+        return TransactionForm(_saveTransaction, transaction: transaction);
       },
     );
+  }
+
+  // 🔥 FUNÇÃO DE EDITAR
+  void _editTransaction(Transaction transaction) {
+    _openTransactionFormModel(context, transaction);
   }
 
   @override
@@ -140,7 +146,11 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Chart(_recentransactio),
-            TransactionList(_transaction, _deleteTransaction),
+            TransactionList(
+              _transaction,
+              _deleteTransaction,
+              _editTransaction, // 🔥 NOVO
+            ),
           ],
         ),
       ),

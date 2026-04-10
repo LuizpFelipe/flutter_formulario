@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import '../models/transaction.dart';
 
 class TransactionForm extends StatefulWidget {
-  const TransactionForm(this.quandoClicar, {super.key});
+  const TransactionForm(this.onSubmit, {this.transaction, super.key});
 
-  final void Function(String, double, DateTime) quandoClicar;
+  final Function(String? id, String title, double value, DateTime date)
+  onSubmit;
+  final Transaction? transaction;
 
   @override
   State<TransactionForm> createState() => _TransactionFormState();
@@ -16,11 +19,28 @@ class _TransactionFormState extends State<TransactionForm> {
   final _valueController = TextEditingController();
   DateTime? _selectDate = DateTime.now();
 
+  @override
+  void initState() {
+    super.initState();
+
+    // 🔥 Se veio uma transação → modo edição
+    if (widget.transaction != null) {
+      _titleController.text = widget.transaction!.title;
+      _valueController.text = widget.transaction!.value.toString();
+      _selectDate = widget.transaction!.date;
+    }
+  }
+
   void _submitForm() {
     String text = _valueController.text.replaceAll(',', '.');
     final value = double.tryParse(text);
 
-    widget.quandoClicar(_titleController.text, value ?? 0, _selectDate!);
+    widget.onSubmit(
+      widget.transaction?.id, // se for null → cria | se tiver → edita
+      _titleController.text,
+      value ?? 0,
+      _selectDate!,
+    );
 
     _valueController.text = '';
     _titleController.text = '';
@@ -29,13 +49,12 @@ class _TransactionFormState extends State<TransactionForm> {
   _showDatePicker() {
     showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: _selectDate ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     ).then((picketDate) {
-      if (picketDate == null) {
-        return;
-      }
+      if (picketDate == null) return;
+
       setState(() {
         _selectDate = picketDate;
       });
@@ -57,7 +76,6 @@ class _TransactionFormState extends State<TransactionForm> {
             TextField(
               controller: _valueController,
               keyboardType: TextInputType.numberWithOptions(decimal: true),
-              /*onChanged: (_) => _subimitForm(),*/
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
               ],
@@ -95,7 +113,7 @@ class _TransactionFormState extends State<TransactionForm> {
                     foregroundColor: Colors.white,
                   ),
                   child: Text(
-                    'Salvar',
+                    widget.transaction != null ? 'Atualizar' : 'Salvar',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
