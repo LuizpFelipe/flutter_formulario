@@ -5,7 +5,7 @@ import '../../providers/transacao_provider.dart';
 import '../../models/transacao.dart';
 
 class TransactionForm extends StatefulWidget {
-  final Transacao? transacaoParaEditar; // Recebe os dados se for edição
+  final Transacao? transacaoParaEditar;
 
   const TransactionForm({super.key, this.transacaoParaEditar});
 
@@ -52,59 +52,74 @@ class _TransactionFormState extends State<TransactionForm> {
 
   @override
   Widget build(BuildContext context) {
+    final keyboardSpace = MediaQuery.of(context).viewInsets.bottom;
+
     return SingleChildScrollView(
-      child: Card(
-        elevation: 5,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            children: [
-              TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Título'),
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: 10,
+          left: 10,
+          right: 10,
+          bottom: keyboardSpace + 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(labelText: 'Título'),
+              autofocus: true,
+            ),
+            TextField(
+              controller: _valueController,
+              decoration: const InputDecoration(labelText: 'Valor (R\$)'),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
               ),
-              TextField(
-                controller: _valueController,
-                decoration: const InputDecoration(labelText: 'Valor (R\$)'),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Data: ${DateFormat('dd/MM/y').format(_selectedDate)}',
-                    ),
+              onSubmitted: (_) => _submitForm(),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Data: ${DateFormat('dd/MM/y').format(_selectedDate)}',
                   ),
-                  TextButton(
-                    onPressed: () async {
-                      final pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: _selectedDate,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime.now(),
-                      );
-                      if (pickedDate != null)
-                        setState(() => _selectedDate = pickedDate);
-                    },
-                    child: const Text(
-                      'Selecionar Data',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: Text(
-                  widget.transacaoParaEditar == null
-                      ? 'Nova Transação'
-                      : 'Salvar Alterações',
                 ),
+                TextButton(
+                  onPressed: () async {
+                    final pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedDate,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime.now(),
+                    );
+                    if (pickedDate != null) {
+                      setState(() => _selectedDate = pickedDate);
+                    }
+                  },
+                  child: const Text(
+                    'Selecionar Data',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 15),
+            ElevatedButton(
+              onPressed: _submitForm,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
               ),
-            ],
-          ),
+              child: Text(
+                widget.transacaoParaEditar == null
+                    ? 'Nova Transação'
+                    : 'Salvar Alterações',
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -12,12 +12,7 @@ class TransactionScreen extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: const TransactionForm(),
-      ),
+      builder: (_) => const TransactionForm(),
     );
   }
 
@@ -29,6 +24,7 @@ class TransactionScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Sincronizar dados',
             onPressed: () =>
                 context.read<TransacaoProvider>().atualizarTransacoes(),
           ),
