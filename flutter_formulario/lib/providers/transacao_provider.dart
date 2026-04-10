@@ -26,50 +26,54 @@ class TransacaoProvider with ChangeNotifier {
           totalSum += _transacoes[i].valor;
         }
       }
-
-      return {
-        'day': DateFormat.E().format(weekDay)[0], // Ex: 'S', 'T', 'Q'
-        'value': totalSum,
-      };
-    }).reversed.toList(); // Inverte para o dia atual ficar na direita
+      return {'day': DateFormat.E().format(weekDay)[0], 'value': totalSum};
+    }).reversed.toList();
   }
 
-  // Calcula o valor total gasto na semana para definir a altura das barras
   double get gastoTotalSemana {
-    return recentesAgrupadas.fold(0.0, (sum, item) {
-      return sum + (item['value'] as double);
-    });
+    return recentesAgrupadas.fold(
+      0.0,
+      (sum, item) => sum + (item['value'] as double),
+    );
   }
 
-  // Função para buscar dados da API
   Future<void> atualizarTransacoes() async {
     _isLoading = true;
-    notifyListeners(); // Avisa a UI para mostrar o carregando (spinner)
-
+    notifyListeners();
     try {
       _transacoes = await _service.fetchAll();
     } catch (e) {
-      print("Erro ao buscar: $e");
+      debugPrint("Erro ao buscar: $e");
     } finally {
       _isLoading = false;
-      notifyListeners(); // Avisa a UI que os dados chegaram
+      notifyListeners();
     }
   }
 
-  // Função para Adicionar
   Future<void> adicionarTransacao(
     String titulo,
     double valor,
     DateTime data,
   ) async {
-    final nova = Transacao(titulo: titulo, valor: valor, data: data);
-    await _service.create(nova);
-    await atualizarTransacoes(); // Recarrega a lista após salvar
+    await _service.create(Transacao(titulo: titulo, valor: valor, data: data));
+    await atualizarTransacoes();
   }
 
-  // Função para Deletar
+  // NOVA FUNÇÃO DE EDITAR
+  Future<void> editarTransacao(
+    String id,
+    String titulo,
+    double valor,
+    DateTime data,
+  ) async {
+    await _service.update(
+      Transacao(id: id, titulo: titulo, valor: valor, data: data),
+    );
+    await atualizarTransacoes();
+  }
+
   Future<void> removerTransacao(String id) async {
     await _service.delete(id);
-    await atualizarTransacoes(); // Recarrega a lista após deletar
+    await atualizarTransacoes();
   }
 }

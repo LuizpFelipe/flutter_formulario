@@ -18,6 +18,7 @@ void main() {
 }
 
 final _router = GoRouter(
+  initialLocation: '/',
   routes: [
     GoRoute(path: '/', builder: (context, state) => const TransactionScreen()),
   ],
